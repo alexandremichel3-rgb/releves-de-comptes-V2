@@ -850,10 +850,10 @@
     <!-- BLOC API SELECTRA -->
     <div class="api-panel">
       <div class="api-panel-text">
-        <h3>⚡ Tarifs en temps réel — API Selectra</h3>
-        <p>Récupère automatiquement les prix HC, HP et l'accise sur l'électricité depuis l'API officielle Selectra (tarifs réglementés EDF en vigueur aujourd'hui).</p>
+        <h3>📋 Derniers tarifs officiels EDF connus</h3>
+        <p>Applique les tarifs réglementés EDF en vigueur au <strong style="color:#f0c040">01/02/2026</strong> — HC, HP, accise, abonnement et CTA — directement dans tous les champs.</p>
       </div>
-      <button class="btn-api" id="btn-api" onclick="fetchTarifsSelectra()">🔄 Récupérer les tarifs</button>
+      <button class="btn-api" id="btn-api" onclick="appliquerDerniersTarifs()">📋 Appliquer les derniers tarifs</button>
       <div class="api-status" id="api-status"></div>
     </div>
 
@@ -1508,84 +1508,60 @@ function recalcAll() {
   recalc(1); recalc(2); recalc(3); recalcCommuns();
 }
 
-// ─── API SELECTRA — TARIFS RÉGLEMENTÉS ──────────────────
-// Utilise l'API publique Selectra pour récupérer les tarifs EDF HP/HC du jour.
-// Doc : https://selectra.info/energie/electricite/prix/api
-async function fetchTarifsSelectra() {
-  const btn = document.getElementById('btn-api');
+// ─── TARIFS OFFICIELS EDF ───────────────────────────────
+// Derniers tarifs réglementés EDF connus (source CRE / EDF)
+// Mis à jour au 01/02/2026 — Option HP/HC 6 kVA
+// HC TTC = 0,1579 € → HT = 0,1316
+// HP TTC = 0,2065 € → HT = 0,1721
+// Accise = 0,03085 €/kWh HT
+// Abonnement annuel TTC 6kVA = 188,89 € → mensuel = 15,74 €
+// CTA (contribution tarifaire acheminement) = incluse dans TURPE
+
+const TARIFS_OFFICIELS = {
+  hc:          0.1316,   // €/kWh HT heures creuses
+  hp:          0.1721,   // €/kWh HT heures pleines
+  accise:      0.03085,  // €/kWh HT accise électricité
+  aboAnnuelTTC: 188.89,  // € TTC abonnement annuel 6kVA
+  ctaAnnuelTTC:  15.00,  // € TTC contribution tarifaire d'acheminement annuelle estimée
+  date:        '01/02/2026',
+  source:      'CRE / EDF / Engie'
+};
+
+function appliquerDerniersTarifs() {
   const status = document.getElementById('api-status');
+  const btn    = document.getElementById('btn-api');
 
-  btn.disabled = true;
-  btn.textContent = '⏳ Chargement…';
-  status.className = 'api-status loading';
-  status.textContent = 'Connexion à l\'API Selectra en cours…';
+  // Remplissage des champs tarifs
+  document.getElementById('prix-hc').value     = TARIFS_OFFICIELS.hc.toFixed(4);
+  document.getElementById('prix-hp').value     = TARIFS_OFFICIELS.hp.toFixed(4);
+  document.getElementById('prix-accise').value = TARIFS_OFFICIELS.accise.toFixed(4);
 
-  try {
-    // Endpoint public Selectra — tarifs réglementés EDF (option HP/HC, 6 kVA)
-    // L'API renvoie les tarifs du jour au format JSON
-    const url = 'https://api.selectra.info/electricity/prices/france/regulated?option=hphc&power=6';
-    const resp = await fetch(url);
-
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-
-    // Extraction des valeurs selon la structure de l'API Selectra
-    // Champs attendus : price_hc (€/kWh HT), price_hp (€/kWh HT), accise (€/kWh HT)
-    const prixHC    = data.price_hc    ?? data.hc    ?? data.prices?.hc    ?? null;
-    const prixHP    = data.price_hp    ?? data.hp    ?? data.prices?.hp    ?? null;
-    const accise    = data.accise      ?? data.excise ?? data.prices?.accise ?? null;
-
-    if (prixHC === null || prixHP === null) throw new Error('Structure API inattendue');
-
-    // Remplissage des champs
-    const hcEl     = document.getElementById('prix-hc');
-    const hpEl     = document.getElementById('prix-hp');
-    const accEl    = document.getElementById('prix-accise');
-
-    hcEl.value  = prixHC.toFixed(4);
-    hpEl.value  = prixHP.toFixed(4);
-    if (accise !== null) accEl.value = accise.toFixed(4);
-
-    saveConfig();
-    recalcAll();
-
-    const date = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-    status.className = 'api-status ok';
-    status.textContent = `✅ Tarifs mis à jour le ${date} — HC : ${prixHC.toFixed(4)} €/kWh · HP : ${prixHP.toFixed(4)} €/kWh${accise !== null ? ' · Accise : ' + accise.toFixed(4) + ' €/kWh' : ''}`;
-
-  } catch (err) {
-    // Fallback : tarifs officiels EDF en vigueur au 1er février 2026 (source CRE)
-    console.warn('API Selectra indisponible, utilisation des tarifs officiels 2026 :', err);
-    applyTarifsDefaut();
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔄 Récupérer les tarifs';
-  }
-}
-
-// Tarifs EDF réglementés en vigueur depuis le 1er février 2026 (source CRE / Engie / EDF)
-// HP/HC option 6 kVA — valeurs HT avant TVA 20%
-function applyTarifsDefaut() {
-  const status = document.getElementById('api-status');
-
-  // Prix HT officiels (TTC ÷ 1.20)
-  // HC TTC = 0,1579 €  →  HT = 0,1316
-  // HP TTC = 0,2065 €  →  HT = 0,1721
-  // Accise = 0,03085 €/kWh (exonérée de TVA, montant net)
-  const hcHT     = 0.1316;
-  const hpHT     = 0.1721;
-  const acciseHT = 0.03085;
-
-  document.getElementById('prix-hc').value     = hcHT.toFixed(4);
-  document.getElementById('prix-hp').value     = hpHT.toFixed(4);
-  document.getElementById('prix-accise').value = acciseHT.toFixed(4);
+  // Abonnement et CTA annuels TTC → champs globaux
+  const aboEl = document.getElementById('abo-ttc');
+  const ctaEl = document.getElementById('acheminement-ttc');
+  if (aboEl) aboEl.value = TARIFS_OFFICIELS.aboAnnuelTTC.toFixed(2);
+  if (ctaEl) ctaEl.value = TARIFS_OFFICIELS.ctaAnnuelTTC.toFixed(2);
 
   saveConfig();
   recalcAll();
 
-  status.className = 'api-status err';
-  status.textContent = `⚠️ API non disponible depuis ce navigateur (CORS). Tarifs officiels EDF au 01/02/2026 appliqués : HC ${hcHT} €/kWh HT · HP ${hpHT} €/kWh HT · Accise ${acciseHT} €/kWh. Vérifiez sur selectra.info/energie/electricite/prix.`;
+  // Feedback visuel
+  btn.textContent = '✅ Appliqué !';
+  btn.style.background = '#1a6e4a';
+  setTimeout(() => {
+    btn.textContent = '📋 Appliquer les derniers tarifs';
+    btn.style.background = '#f0c040';
+  }, 2500);
+
+  status.className = 'api-status ok';
+  status.textContent =
+    `✅ Tarifs EDF en vigueur au ${TARIFS_OFFICIELS.date} appliqués (${TARIFS_OFFICIELS.source}) — ` +
+    `HC : ${TARIFS_OFFICIELS.hc} €/kWh HT · HP : ${TARIFS_OFFICIELS.hp} €/kWh HT · ` +
+    `Accise : ${TARIFS_OFFICIELS.accise} €/kWh · Abo. : ${TARIFS_OFFICIELS.aboAnnuelTTC} €/an TTC`;
 }
+
+// Alias conservé pour compatibilité bouton HTML
+function fetchTarifsSelectra() { appliquerDerniersTarifs(); }
 
 
 function updateBadges() {
