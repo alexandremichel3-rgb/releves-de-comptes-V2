@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.C.I LES 3 M — Relevés Électriques</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f4f6;
+    --surface: #ffffff;
+    --surface2: #f0f0f4;
+    --border: #d0d0e0;
+    --accent: #1a1a2e;
+    --accent2: #1a6e4a;
+    --text: #1a1a2e;
+    --text-dim: #7070a0;
+    --input-bg: #fafafc;
+    --red: #d03030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: #1a1a2e;
+    border-bottom: 2px solid #1a1a2e;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: #f0c040;
+    line-height: 1;
+    display: inline;
+    vertical-align: baseline;
+    font-variant-numeric: normal;
+    font-feature-settings: "lnum" 1;
+  }
+  header span {
+    font-size: 0.75rem;
+    color: #a0a0c0;
+    letter-spacing: 0.1em;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 24px 32px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 10px 24px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: #1a1a2e;
+    border-bottom-color: #1a1a2e;
+  }
+
+  /* MAIN */
+  main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+  /* SETTINGS PANEL */
+  .settings-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .settings-panel h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .field-group label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field-group input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field-group input:focus { border-color: var(--accent); }
+
+  /* RELEVÉ CARD */
+  .releve-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .card-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .locataire-adresse {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  .card-header .locataire-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a2e;
+    flex: 1;
+  }
+  .card-header input.name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--border);
+    color: #1a1a2e;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    outline: none;
+    flex: 1;
+    padding: 2px 4px;
+  }
+  .card-header input.name-input:focus { border-bottom-color: var(--accent); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  thead th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  thead th:not(:first-child) { text-align: center; }
+
+  tr.section-title td {
+    background: #e8e8f4;
+    padding: 8px 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #1a6e4a;
+    border-top: 1px solid var(--border);
+  }
+  tr.row-data td {
+    padding: 6px 14px;
+    border-bottom: 1px solid #1c1c28;
+    vertical-align: middle;
+  }
+  tr.row-data td:first-child {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+  tr.row-data td.center { text-align: center; }
+
+  tr.row-soit td {
+    padding: 8px 14px;
+    background: #eeeef8;
+    border-top: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    font-weight: 500;
+  }
+  tr.row-soit td:first-child {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
+  tr.row-soit td.center { text-align: center; }
+
+  tr.row-fixed td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #1c1c28;
+    color: var(--text-dim);
+  }
+  tr.row-fixed td:first-child { font-size: 0.78rem; }
+
+  tr.row-total td {
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-top: 2px solid #1a1a2e;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+  tr.row-total td.total-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: right;
+    padding-right: 20px;
+  }
+  tr.row-total td.total-value {
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    text-align: center;
+    min-width: 130px;
+  }
+
+  /* INPUTS in table */
+  td input.cell-input {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 4px 8px;
+    width: 100px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s;
+    display: block;
+    margin: 0 auto;
+  }
+  td input.cell-input:focus { border-color: var(--accent); }
+
+  .pu-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .pu-input {
+    width: 90px !important;
+  }
+  .tva-label {
+    font-size: 0.68rem;
+    color: #1a6e4a;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: #e8f5ee;
+    border-radius: 3px;
+    padding: 1px 6px;
+  }
+
+  .computed {
+    color: var(--accent2);
+    font-weight: 500;
+    text-align: center;
+    white-space: pre-line;
+    font-size: 0.78rem;
+  }
+  .computed-eur {
+    color: var(--text);
+    font-weight: 500;
+    text-align: center;
+  }
+  .dim { color: var(--text-dim); font-size: 0.75rem; text-align: center; }
+
+  /* A RÉGLER */
+  .a-regler-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: #1a1a2e;
+    border-top: 2px solid #1a1a2e;
+  }
+  .a-regler-row span:first-child {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f0c040;
+  }
+  .a-regler-row span.montant {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: #f0c040;
+  }
+
+  /* SECTION CONFIG */
+  #tab-config { display: none; }
+  #tab-releves { display: block; }
+
+  /* PERIOD BADGE */
+  .period-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* SAVE BTN */
+  .btn-save {
+    background: #1a1a2e;
+    color: #f0c040;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { background: var(--red); color: #fff; }
+
+  .actions-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .info-box {
+    background: #e8f5ee;
+    border: 1px solid #1a6e4a;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 0.78rem;
+    color: #1a6e4a;
+    margin-bottom: 20px;
+  }  .btn-card-pdf {
+    background: transparent;
+    color: #1a1a2e;
+    border: 1px solid #1a1a2e;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-card-pdf:hover { background: #1a1a2e; color: #f0c040; }
+
+  .btn-pdf {
+    background: transparent;
+    color: #1a6e4a;
+    border: 1px solid #1a6e4a;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-pdf:hover { background: #1a6e4a; color: #fff; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 12mm 14mm; }
+
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    body { background: #fff !important; color: #000 !important; font-size: 10px !important; font-family: Arial, sans-serif !important; }
+
+    header, .tabs, .settings-panel, .actions-row, #tab-config,
+    .btn-card-pdf, .btn-pdf, .btn-save, .btn-reset,
+    thead,
+    tr.row-data,
+    tr.section-title { display: none !important; }
+
+    main { padding: 0 !important; max-width: 100% !important; }
+    #tab-releves { display: block !important; }
+
+    /* Chaque carte = 1 page */
+    .releve-card {
+      border: none !important;
+      margin: 0 0 8mm 0 !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      page-break-after: always !important;
+      break-after: page !important;
+    }
+    .releve-card:last-child { page-break-after: auto !important; break-after: auto !important; }
+
+    /* En-tête SCI */
+    .print-title {
+      display: block !important;
+      text-align: center !important;
+      font-size: 13px !important;
+      font-weight: bold !important;
+      font-family: Arial, sans-serif !important;
+      padding: 0 0 6mm 0 !important;
+      letter-spacing: 0.08em !important;
+      text-transform: uppercase !important;
+    }
+
+    /* En-tête locataire */
+    .card-header {
+      background: #1a1a2e !important;
+      padding: 8px 12px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 0 !important;
+    }
+    .locataire-name { color: #f0c040 !important; font-size: 11px !important; font-weight: bold !important; }
+    .locataire-adresse { color: #ccc !important; font-size: 9px !important; }
+    .period-badge { background: #444 !important; color: #fff !important; font-size: 9px !important; padding: 2px 8px !important; border-radius: 3px !important; }
+
+    /* TABLE simple */
+    table { width: 100% !important; border-collapse: collapse !important; font-size: 10px !important; }
+    tr, td { display: table-row !important; }
+    td { display: table-cell !important; }
+
+    /* Lignes SOIT = les résultats clés */
+    tr.row-soit {
+      display: table-row !important;
+    }
+    tr.row-soit td {
+      padding: 7px 12px !important;
+      border-bottom: 1px solid #ddd !important;
+      font-size: 10px !important;
+      vertical-align: middle !important;
+      background: #fff !important;
+    }
+    tr.row-soit td:first-child {
+      font-weight: bold !important;
+      color: #1a1a2e !important;
+      text-align: left !important;
+      width: 30% !important;
+    }
+    tr.row-soit td.computed {
+      color: #1a6e4a !important;
+      font-weight: bold !important;
+      text-align: center !important;
+    }
+    tr.row-soit td.computed-eur {
+      font-weight: bold !important;
+      text-align: right !important;
+      color: #1a1a2e !important;
+    }
+    tr.row-soit td.dim { display: none !important; }
+
+    /* Lignes fixes (abo, ach) */
+    tr.row-fixed {
+      display: table-row !important;
+    }
+    tr.row-fixed td {
+      padding: 7px 12px !important;
+      border-bottom: 1px solid #ddd !important;
+      font-size: 10px !important;
+      vertical-align: middle !important;
+    }
+    tr.row-fixed td:first-child { font-weight: bold !important; color: #1a1a2e !important; }
+    tr.row-fixed td.computed-eur { text-align: right !important; font-weight: bold !important; }
+    tr.row-fixed td.dim { display: none !important; }
+
+    /* TOTAL */
+    tr.row-total {
+      display: table-row !important;
+    }
+    tr.row-total td {
+      padding: 10px 12px !important;
+      border-top: 2px solid #1a1a2e !important;
+      background: #f0f0f4 !important;
+      font-weight: bold !important;
+      font-size: 12px !important;
+    }
+    tr.row-total td.total-label { text-align: right !important; color: #555 !important; padding-right: 12px !important; }
+    tr.row-total td.total-value { text-align: right !important; color: #1a1a2e !important; }
+
+    /* Inputs */
+    input.cell-input, input.pu-input {
+      border: none !important;
+      background: transparent !important;
+      font-size: 10px !important;
+      width: auto !important;
+      text-align: center !important;
+      font-family: Arial, sans-serif !important;
+      padding: 0 !important;
+      font-weight: bold !important;
+    }
+    .pu-wrapper { display: inline-flex !important; flex-direction: row !important; align-items: center !important; gap: 4px !important; }
+    .tva-label { display: none !important; }
+
+    /* À régler */
+    .a-regler-row {
+      background: #1a1a2e !important;
+      padding: 10px 12px !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      margin-top: 2px !important;
+    }
+    .a-regler-row span:first-child {
+      color: #f0c040 !important;
+      font-size: 10px !important;
+      font-weight: bold !important;
+      letter-spacing: 0.15em !important;
+      text-transform: uppercase !important;
+    }
+    .a-regler-row span.montant {
+      color: #f0c040 !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+    }
+  }
+  .print-title { display: none; }
+
+  /* ─── BLOC API TARIFS ──────────────────────────────────── */
+  .api-panel {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .api-panel-text {
+    flex: 1;
+    min-width: 200px;
+  }
+  .api-panel-text h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #f0c040;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .api-panel-text p {
+    font-size: 0.75rem;
+    color: #a0a0c0;
+    line-height: 1.5;
+  }
+  .btn-api {
+    background: #f0c040;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .btn-api:hover { opacity: 0.85; }
+  .btn-api:disabled { opacity: 0.5; cursor: not-allowed; }
+  .api-status {
+    width: 100%;
+    font-size: 0.75rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: none;
+  }
+  .api-status.ok  { background: #1a6e4a22; color: #1a6e4a; border: 1px solid #1a6e4a; display: block; }
+  .api-status.err { background: #d0303022; color: #d03030; border: 1px solid #d03030; display: block; }
+  .api-status.loading { background: #f0c04022; color: #b08000; border: 1px solid #f0c040; display: block; }
+
+  /* ─── RESPONSIVE MOBILE ─────────────────────────────── */
+  @media (max-width: 768px) {
+
+    /* Header compact */
+    header {
+      padding: 12px 16px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    header h1 { font-size: 1.1rem; }
+    header > span { font-size: 0.65rem; }
+
+    /* Tabs */
+    .tabs { padding: 0; }
+    .tab-btn { padding: 12px 18px; font-size: 0.8rem; flex: 1; text-align: center; }
+
+    /* Main padding réduit */
+    main { padding: 12px; }
+
+    /* Settings panel */
+    .settings-panel { padding: 14px; margin-bottom: 16px; }
+    .settings-grid { grid-template-columns: 1fr; gap: 10px; }
+    .field-group input { font-size: 1rem; padding: 10px 12px; }
+
+    /* Card header */
+    .card-header { padding: 12px 14px; gap: 8px; }
+    .card-header .locataire-name { font-size: 0.9rem; }
+    .locataire-adresse { font-size: 0.7rem; }
+    .btn-card-pdf { padding: 6px 10px; font-size: 0.7rem; }
+    .period-badge { font-size: 0.65rem; padding: 3px 8px; }
+
+    /* TABLE → CARDS MOBILE */
+    /* Masquer le thead sur mobile */
+    table thead { display: none; }
+
+    /* Chaque ligne devient un bloc */
+    table, tbody, tr, td { display: block; width: 100%; }
+
+    tr.section-title td {
+      font-size: 0.8rem;
+      padding: 10px 14px;
+      border-radius: 0;
+    }
+
+    /* Ligne de données : label + input côte à côte */
+    tr.row-data {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+    tr.row-data td {
+      border: none !important;
+      padding: 0 !important;
+    }
+    tr.row-data td:first-child {
+      flex: 1;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+    tr.row-data td.center,
+    tr.row-data td:not(:first-child) {
+      flex: 0 0 auto;
+    }
+    tr.row-data td.dim { display: none; }
+
+    /* Ligne SOIT */
+    tr.row-soit {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+    }
+    tr.row-soit td {
+      border: none !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+    tr.row-soit td:first-child { flex: 1; min-width: 60px; }
+    tr.row-soit td.dim { display: none; }
+    tr.row-soit td.center { flex: 0 0 auto; }
+    tr.row-soit td.computed-eur { flex: 0 0 auto; font-weight: 700; color: #1a1a2e; }
+    tr.row-soit { background: #eeeef8; border-radius: 0; }
+
+    /* Ligne fixe (abo, ach) */
+    tr.row-fixed {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      gap: 10px;
+    }
+    tr.row-fixed td { border: none !important; padding: 0 !important; }
+    tr.row-fixed td:first-child { flex: 1; }
+    tr.row-fixed td.dim { display: none; }
+    tr.row-fixed td.computed-eur { flex: 0 0 auto; font-weight: 700; }
+
+    /* Ligne TOTAL */
+    tr.row-total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+    }
+    tr.row-total td { border: none !important; padding: 0 !important; background: transparent !important; }
+    tr.row-total td.total-label { text-align: left; padding-right: 0 !important; font-size: 0.8rem; }
+    tr.row-total td.total-value { font-size: 1.1rem; }
+
+    /* Inputs dans tableau */
+    td input.cell-input {
+      width: 100px !important;
+      font-size: 1rem;
+      padding: 6px 8px;
+    }
+    .pu-input { width: 90px !important; }
+
+    /* À régler */
+    .a-regler-row { padding: 12px 14px; }
+    .a-regler-row span:first-child { font-size: 0.85rem; }
+    .a-regler-row span.montant { font-size: 1.2rem; }
+
+    /* Actions */
+    .actions-row {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn-save, .btn-reset, .btn-pdf {
+      flex: 1;
+      min-width: 140px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  }
+
+  /* Très petits écrans */
+  @media (max-width: 400px) {
+    header h1 { font-size: 0.95rem; }
+    td input.cell-input { width: 85px !important; }
+    .pu-input { width: 75px !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; flex-direction:column; gap:2px;">
+    <h1 style="line-height:1; vertical-align:baseline;">S.C.I LES 3 M</h1>
+    <span style="color:#a0a0c0; font-size:0.75rem; font-family:'DM Mono',monospace; letter-spacing:0.05em;">791, chemin de Castane — 84250 LE THOR</span>
+  </div>
+  <span id="date-display"></span>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('releves')">Relevés</button>
+  <button class="tab-btn" onclick="showTab('config')">⚙ Configuration</button>
+</div>
+
+<main>
+  <div class="print-title" style="text-align:center; font-family:'Syne',sans-serif; font-weight:800; font-size:16px; padding:16px 0 8px; letter-spacing:0.1em;">
+    ⚡ RELEVÉS ÉLECTRIQUES — <span id="print-date-label"></span>
+  </div>
+
+  <!-- CONFIG TAB -->
+  <div id="tab-config">
+    <div class="settings-panel">
+      <h2>Noms et adresses des locataires (définitifs)</h2>
+      <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="field-group">
+          <label>Appartement 1 — Nom</label>
+          <input type="text" id="nom1" placeholder="Nom du locataire" oninput="saveConfig()">
+          <label style="margin-top:8px;">Adresse</label>
+          <input type="text" id="adr1a" placeholder="Rue" oninput="saveConfig()" style="margin-bottom:4px;">
+          <input type="text" id="adr1b" placeholder="Code postal et ville" oninput="saveConfig()">
+        </div>
+        <div class="field-group">
+          <label>Appartement 2 — Nom</label>
+          <input type="text" id="nom2" placeholder="Nom du locataire" oninput="saveConfig()">
+          <label style="margin-top:8px;">Adresse</label>
+          <input type="text" id="adr2a" placeholder="Rue" oninput="saveConfig()" style="margin-bottom:4px;">
+          <input type="text" id="adr2b" placeholder="Code postal et ville" oninput="saveConfig()">
+        </div>
+        <div class="field-group">
+          <label>Appartement 3 — Nom</label>
+          <input type="text" id="nom3" placeholder="Nom du locataire" oninput="saveConfig()">
+          <label style="margin-top:8px;">Adresse</label>
+          <input type="text" id="adr3a" placeholder="Rue" oninput="saveConfig()" style="margin-bottom:4px;">
+          <input type="text" id="adr3b" placeholder="Code postal et ville" oninput="saveConfig()">
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC API SELECTRA -->
+    <div class="api-panel">
+      <div class="api-panel-text">
+        <h3>⚡ Tarifs en temps réel — API Selectra</h3>
+        <p>Récupère automatiquement les prix HC, HP et l'accise sur l'électricité depuis l'API officielle Selectra (tarifs réglementés EDF en vigueur aujourd'hui).</p>
+      </div>
+      <button class="btn-api" id="btn-api" onclick="fetchTarifsSelectra()">🔄 Récupérer les tarifs</button>
+      <div class="api-status" id="api-status"></div>
+    </div>
+
+    <div class="settings-panel">
+      <h2>Tarifs (modifiables)</h2>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Prix HC — HT (€/kWh)</label>
+          <input type="number" id="prix-hc" step="0.0001" placeholder="ex: 0.1470" oninput="saveConfig(); recalcAll()">
+        </div>
+        <div class="field-group">
+          <label>Prix HP — HT (€/kWh)</label>
+          <input type="number" id="prix-hp" step="0.0001" placeholder="ex: 0.1960" oninput="saveConfig(); recalcAll()">
+        </div>
+        <div class="field-group">
+          <label>Accise électricité (€/kWh HT)</label>
+          <input type="number" id="prix-accise" step="0.0001" placeholder="ex: 0.0225" oninput="saveConfig(); recalcAll()">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-panel">
+      <h2>Montants fixes partagés ÷ 3 (TTC global)</h2>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Participation abonnement TTC total (€)</label>
+          <input type="number" id="abo-ttc" step="0.01" placeholder="ex: 45.00" oninput="saveConfig(); recalcAll()">
+        </div>
+        <div class="field-group">
+          <label>Contribution acheminement TTC total (€)</label>
+          <input type="number" id="acheminement-ttc" step="0.01" placeholder="ex: 18.00" oninput="saveConfig(); recalcAll()">
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      💡 Les noms des locataires sont sauvegardés automatiquement dans votre navigateur. Les tarifs peuvent être mis à jour à chaque relevé.
+    </div>
+  </div>
+
+  <!-- RELEVÉS TAB -->
+  <div id="tab-releves">
+
+    <div class="settings-panel" style="margin-bottom:24px;">
+      <h2>Consommation EDF en date du</h2>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Date du relevé</label>
+          <input type="date" id="date-releve" oninput="saveData()">
+        </div>
+      </div>
+    </div>
+
+    <!-- APPARTEMENT 1 -->
+    <div class="releve-card" id="card-1">
+      <div class="card-header">
+        <div class="card-header-info">
+          <span class="locataire-name" id="display-nom1">Locataire 1</span>
+          <span class="locataire-adresse" id="display-adr1"></span>
+        </div>
+        <span class="period-badge" id="badge-date">—</span>
+        <button class="btn-card-pdf" onclick="exportCardPDF('card-1')">📄 PDF</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:26%">Dénomination</th>
+            <th style="width:13%">Ancien</th>
+            <th style="width:13%">Nouveau</th>
+            <th style="width:13%">Quantité (kWh)</th>
+            <th style="width:18%">Montant Unitaire HT (+TVA 20%)</th>
+            <th style="width:17%">Sous-total TTC</th>
+          </tr>
+        </thead>
+        <tbody id="body-1"></tbody>
+      </table>
+      <div class="a-regler-row">
+        <span>À régler</span>
+        <span class="montant" id="aregler-1">0,00 €</span>
+      </div>
+    </div>
+
+    <!-- APPARTEMENT 2 -->
+    <div class="releve-card" id="card-2">
+      <div class="card-header">
+        <div class="card-header-info">
+          <span class="locataire-name" id="display-nom2">Locataire 2</span>
+          <span class="locataire-adresse" id="display-adr2"></span>
+        </div>
+        <span class="period-badge">—</span>
+        <button class="btn-card-pdf" onclick="exportCardPDF('card-2')">📄 PDF</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:26%">Dénomination</th>
+            <th style="width:13%">Ancien</th>
+            <th style="width:13%">Nouveau</th>
+            <th style="width:13%">Quantité (kWh)</th>
+            <th style="width:18%">Montant Unitaire HT (+TVA 20%)</th>
+            <th style="width:17%">Sous-total TTC</th>
+          </tr>
+        </thead>
+        <tbody id="body-2"></tbody>
+      </table>
+      <div class="a-regler-row">
+        <span>À régler</span>
+        <span class="montant" id="aregler-2">0,00 €</span>
+      </div>
+    </div>
+    <div class="releve-card" id="card-3">
+      <div class="card-header">
+        <div class="card-header-info">
+          <span class="locataire-name" id="display-nom3">Locataire 3</span>
+          <span class="locataire-adresse" id="display-adr3"></span>
+        </div>
+        <span class="period-badge">—</span>
+        <button class="btn-card-pdf" onclick="exportCardPDF('card-3')">📄 PDF</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:26%">Dénomination</th>
+            <th style="width:13%">Ancien</th>
+            <th style="width:13%">Nouveau</th>
+            <th style="width:13%">Quantité (kWh)</th>
+            <th style="width:18%">Montant Unitaire HT (+TVA 20%)</th>
+            <th style="width:17%">Sous-total TTC</th>
+          </tr>
+        </thead>
+        <tbody id="body-3"></tbody>
+      </table>
+      <div class="a-regler-row">
+        <span>À régler</span>
+        <span class="montant" id="aregler-3">0,00 €</span>
+      </div>
+    </div>
+
+    <!-- COMMUNS -->
+    <div class="releve-card" id="card-communs" style="border-top: 3px solid #1a1a2e;">
+      <div class="card-header" style="background:#1a1a2e;">
+        <div class="card-header-info">
+          <span class="locataire-name" style="color:#f0c040;">⚡ Communs</span>
+          <span class="locataire-adresse" style="color:#a0a0c0;">Parties communes de l'immeuble</span>
+        </div>
+        <span class="period-badge">—</span>
+        <button class="btn-card-pdf" style="border-color:#f0c040;color:#f0c040;" onclick="exportCardPDF('card-communs')">📄 PDF</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:26%">Dénomination</th>
+            <th style="width:13%">Ancien</th>
+            <th style="width:13%">Nouveau</th>
+            <th style="width:13%">Quantité (kWh)</th>
+            <th style="width:18%">Montant Unitaire HT (+TVA 20%)</th>
+            <th style="width:17%">Sous-total TTC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- HEURES CREUSES -->
+          <tr class="row-data">
+            <td>Nouveau (kWh)</td>
+            <td class="dim">—</td>
+            <td class="center"><input class="cell-input" type="number" id="c-hc-nouveau" placeholder="0" oninput="recalcCommuns()"></td>
+            <td class="dim">—</td><td class="dim">—</td><td class="dim">—</td>
+          </tr>
+          <tr class="row-data">
+            <td>Ancien (kWh)</td>
+            <td class="center"><input class="cell-input" type="number" id="c-hc-ancien" placeholder="0" oninput="recalcCommuns()"></td>
+            <td class="dim">—</td>
+            <td class="dim">—</td><td class="dim">—</td><td class="dim">—</td>
+          </tr>
+          <tr class="row-soit">
+            <td>Soit</td>
+            <td class="dim center">—</td><td class="dim center">—</td>
+            <td class="computed" id="c-hc-qte">0 kWh</td>
+            <td class="center">
+              <div class="pu-wrapper">
+                <input class="cell-input pu-input" type="number" id="c-hc-pu" placeholder="0.0000" step="0.0001" oninput="recalcCommuns()">
+                <span class="tva-label">+20%</span>
+              </div>
+            </td>
+            <td class="computed-eur" id="c-hc-total">0,00 €</td>
+          </tr>
+
+          <!-- HEURES PLEINES -->
+          <tr class="section-title"><td colspan="6">Heures Pleines</td></tr>
+          <tr class="row-data">
+            <td>Nouveau (kWh)</td>
+            <td class="dim">—</td>
+            <td class="center"><input class="cell-input" type="number" id="c-hp-nouveau" placeholder="0" oninput="recalcCommuns()"></td>
+            <td class="dim">—</td><td class="dim">—</td><td class="dim">—</td>
+          </tr>
+          <tr class="row-data">
+            <td>Ancien (kWh)</td>
+            <td class="center"><input class="cell-input" type="number" id="c-hp-ancien" placeholder="0" oninput="recalcCommuns()"></td>
+            <td class="dim">—</td>
+            <td class="dim">—</td><td class="dim">—</td><td class="dim">—</td>
+          </tr>
+          <tr class="row-soit">
+            <td>Soit</td>
+            <td class="dim center">—</td><td class="dim center">—</td>
+            <td class="computed" id="c-hp-qte">0 kWh</td>
+            <td class="center">
+              <div class="pu-wrapper">
+                <input class="cell-input pu-input" type="number" id="c-hp-pu" placeholder="0.0000" step="0.0001" oninput="recalcCommuns()">
+                <span class="tva-label">+20%</span>
+              </div>
+            </td>
+            <td class="computed-eur" id="c-hp-total">0,00 €</td>
+          </tr>
+
+          <!-- ACCISE -->
+          <tr class="section-title"><td colspan="6">Accise sur l'électricité</td></tr>
+          <tr class="row-soit">
+            <td>Consommation totale</td>
+            <td class="dim center">—</td><td class="dim center">—</td>
+            <td class="computed" id="c-accise-qte">0 kWh</td>
+            <td class="center">
+              <div class="pu-wrapper">
+                <input class="cell-input pu-input" type="number" id="c-accise-pu" placeholder="0.0000" step="0.0001" oninput="recalcCommuns()">
+                <span class="tva-label">+20%</span>
+              </div>
+            </td>
+            <td class="computed-eur" id="c-accise-total">0,00 €</td>
+          </tr>
+
+          <!-- TOTAL -->
+          <tr class="row-total">
+            <td colspan="5" class="total-label">TOTAL TTC</td>
+            <td class="total-value" id="c-total-ttc">0,00 €</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="a-regler-row">
+        <span>À régler</span>
+        <span class="montant" id="c-aregler">0,00 €</span>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn-reset" onclick="resetReleves()">🗑 Nouveau relevé</button>
+      <button class="btn-pdf" onclick="exportPDF()">📄 Exporter en PDF</button>
+      <button class="btn-save" id="btn-save-main" onclick="saveAll()">💾 Sauvegarder</button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────
+const TVA = 0.20;
+
+function getConfig() {
+  return JSON.parse(localStorage.getItem('elec_config') || '{}');
+}
+function saveConfig() {
+  const cfg = {
+    nom1: document.getElementById('nom1').value,
+    nom2: document.getElementById('nom2').value,
+    nom3: document.getElementById('nom3').value,
+    adr1a: document.getElementById('adr1a').value,
+    adr1b: document.getElementById('adr1b').value,
+    adr2a: document.getElementById('adr2a').value,
+    adr2b: document.getElementById('adr2b').value,
+    adr3a: document.getElementById('adr3a').value,
+    adr3b: document.getElementById('adr3b').value,
+    prixHC: parseFloat(document.getElementById('prix-hc').value) || 0,
+    prixHP: parseFloat(document.getElementById('prix-hp').value) || 0,
+    prixAccise: parseFloat(document.getElementById('prix-accise').value) || 0,
+  };
+  localStorage.setItem('elec_config', JSON.stringify(cfg));
+  updateNames();
+}
+
+function loadConfig() {
+  const cfg = getConfig();
+  // Pré-remplissage locataire 1 si vide
+  const defaults = {
+    nom1: 'Monsieur DAHMANI Ahmed',
+    adr1a: '56, chemin des prés',
+    adr1b: '84260 SARRIANS',
+    nom2: 'Mr CLAUS Olivier et Madame MATHIEU Audrey',
+    adr2a: '56, chemin des prés',
+    adr2b: '84260 SARRIANS',
+    nom3: 'Madame REYNAUD Nathalie',
+    adr3a: '56, chemin des prés',
+    adr3b: '84260 SARRIANS',
+  };
+  ['nom1','nom2','nom3','adr1a','adr1b','adr2a','adr2b','adr3a','adr3b'].forEach(k => {
+    const el = document.getElementById(k);
+    if (el) el.value = cfg[k] || defaults[k] || '';
+  });
+  if (cfg.prixHC) document.getElementById('prix-hc').value = cfg.prixHC;
+  if (cfg.prixHP) document.getElementById('prix-hp').value = cfg.prixHP;
+  if (cfg.prixAccise) document.getElementById('prix-accise').value = cfg.prixAccise;
+  updateNames();
+}
+
+function updateNames() {
+  const cfg = getConfig();
+  const defaults = {
+    nom1: 'Monsieur DAHMANI Ahmed',
+    adr1a: '56, chemin des prés',
+    adr1b: '84260 SARRIANS',
+    nom2: 'Mr CLAUS Olivier et Madame MATHIEU Audrey',
+    adr2a: '56, chemin des prés',
+    adr2b: '84260 SARRIANS',
+    nom3: 'Madame REYNAUD Nathalie',
+    adr3a: '56, chemin des prés',
+    adr3b: '84260 SARRIANS',
+  };
+  for (let i = 1; i <= 3; i++) {
+    const nom  = cfg['nom'+i]  || defaults['nom'+i]  || `Locataire ${i}`;
+    const adr1 = cfg['adr'+i+'a'] || defaults['adr'+i+'a'] || '';
+    const adr2 = cfg['adr'+i+'b'] || defaults['adr'+i+'b'] || '';
+    document.getElementById('display-nom'+i).textContent = nom;
+    const adrEl = document.getElementById('display-adr'+i);
+    if (adrEl) adrEl.textContent = [adr1, adr2].filter(Boolean).join(' — ');
+  }
+}
+
+// ─── DATA SAVE/LOAD ─────────────────────────────────────
+function saveData() {
+  const data = {};
+  for (let i = 1; i <= 3; i++) {
+    data['hc_ancien_'+i]  = val('hc-ancien-'+i);
+    data['hc_nouveau_'+i] = val('hc-nouveau-'+i);
+    data['hp_ancien_'+i]  = val('hp-ancien-'+i);
+    data['hp_nouveau_'+i] = val('hp-nouveau-'+i);
+    data['hc_pu_'+i]      = val('hc-pu-'+i);
+    data['hp_pu_'+i]      = val('hp-pu-'+i);
+    data['accise_pu_'+i]  = val('accise-pu-'+i);
+    data['abo_ht_'+i]     = val('abo-ht-'+i);
+    data['ach_ht_'+i]     = val('ach-ht-'+i);
+  }
+  data.date = document.getElementById('date-releve').value;
+  data.c_hc_ancien   = val('c-hc-ancien');
+  data.c_hc_nouveau  = val('c-hc-nouveau');
+  data.c_hp_ancien   = val('c-hp-ancien');
+  data.c_hp_nouveau  = val('c-hp-nouveau');
+  data.c_hc_pu       = val('c-hc-pu');
+  data.c_hp_pu       = val('c-hp-pu');
+  data.c_accise_pu   = val('c-accise-pu');
+  localStorage.setItem('elec_data', JSON.stringify(data));
+  updateBadges();
+}
+
+function loadData() {
+  const data = JSON.parse(localStorage.getItem('elec_data') || '{}');
+  for (let i = 1; i <= 3; i++) {
+    setVal('hc-ancien-'+i,  data['hc_ancien_'+i]);
+    setVal('hc-nouveau-'+i, data['hc_nouveau_'+i]);
+    setVal('hp-ancien-'+i,  data['hp_ancien_'+i]);
+    setVal('hp-nouveau-'+i, data['hp_nouveau_'+i]);
+    setVal('hc-pu-'+i,      data['hc_pu_'+i]);
+    setVal('hp-pu-'+i,      data['hp_pu_'+i]);
+    setVal('accise-pu-'+i,  data['accise_pu_'+i]);
+    setVal('abo-ht-'+i,     data['abo_ht_'+i]);
+    setVal('ach-ht-'+i,     data['ach_ht_'+i]);
+  }
+  if (data.date) document.getElementById('date-releve').value = data.date;
+  setVal('c-hc-ancien',  data.c_hc_ancien);
+  setVal('c-hc-nouveau', data.c_hc_nouveau);
+  setVal('c-hp-ancien',  data.c_hp_ancien);
+  setVal('c-hp-nouveau', data.c_hp_nouveau);
+  setVal('c-hc-pu',      data.c_hc_pu);
+  setVal('c-hp-pu',      data.c_hp_pu);
+  setVal('c-accise-pu',  data.c_accise_pu);
+  updateBadges();
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? parseFloat(el.value) || 0 : 0;
+}
+function setVal(id, v) {
+  const el = document.getElementById(id);
+  if (el && v !== undefined && v !== null && v !== 0) el.value = v;
+}
+
+function resetReleves() {
+  if (!confirm('Nouveau relevé : effacer toutes les saisies ?')) return;
+  for (let i = 1; i <= 3; i++) {
+    ['hc-ancien-', 'hc-nouveau-', 'hp-ancien-', 'hp-nouveau-',
+     'hc-pu-', 'hp-pu-', 'accise-pu-', 'abo-ht-', 'ach-ht-'].forEach(p => {
+      const el = document.getElementById(p+i);
+      if (el) el.value = '';
+    });
+  }
+  ['c-hc-ancien','c-hc-nouveau','c-hp-ancien','c-hp-nouveau','c-hc-pu','c-hp-pu','c-accise-pu'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('date-releve').value = '';
+  localStorage.removeItem('elec_data');
+  recalcAll();
+}
+
+// ─── TABLES BUILD ───────────────────────────────────────
+function buildTable(n) {
+  const tbody = document.getElementById('body-'+n);
+  tbody.innerHTML = `
+    <!-- ABONNEMENT -->
+    <tr class="section-title"><td colspan="6">Participation à l'abonnement</td></tr>
+    <tr class="row-fixed">
+      <td>Montant HT</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="center">
+        <div class="pu-wrapper">
+          <input class="cell-input pu-input" type="number" id="abo-ht-${n}" placeholder="0.00" step="0.01" oninput="recalc(${n})">
+          <span class="tva-label">+20% ÷ 3</span>
+        </div>
+      </td>
+      <td class="computed-eur" id="abo-part-${n}">—</td>
+    </tr>
+
+    <!-- HEURES CREUSES -->
+    <tr class="section-title"><td colspan="6">Heures Creuses</td></tr>
+    <tr class="row-data">
+      <td>Nouveau (kWh)</td>
+      <td class="dim">—</td>
+      <td class="center">
+        <input class="cell-input" type="number" id="hc-nouveau-${n}" placeholder="0" oninput="recalc(${n})">
+      </td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+    </tr>
+    <tr class="row-data">
+      <td>Ancien (kWh)</td>
+      <td class="center">
+        <input class="cell-input" type="number" id="hc-ancien-${n}" placeholder="0" oninput="recalc(${n})">
+      </td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+    </tr>
+    <tr class="row-soit">
+      <td>Soit</td>
+      <td class="dim center">—</td>
+      <td class="dim center">—</td>
+      <td class="computed" id="hc-qte-${n}">0 kWh</td>
+      <td class="center">
+        <div class="pu-wrapper">
+          <input class="cell-input pu-input" type="number" id="hc-pu-${n}" placeholder="0.0000" step="0.0001" oninput="recalc(${n})">
+          <span class="tva-label">+20%</span>
+        </div>
+      </td>
+      <td class="computed-eur" id="hc-sous-total-${n}">0,00 €</td>
+    </tr>
+
+    <!-- HEURES PLEINES -->
+    <tr class="section-title"><td colspan="6">Heures Pleines</td></tr>
+    <tr class="row-data">
+      <td>Nouveau (kWh)</td>
+      <td class="dim">—</td>
+      <td class="center">
+        <input class="cell-input" type="number" id="hp-nouveau-${n}" placeholder="0" oninput="recalc(${n})">
+      </td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+    </tr>
+    <tr class="row-data">
+      <td>Ancien (kWh)</td>
+      <td class="center">
+        <input class="cell-input" type="number" id="hp-ancien-${n}" placeholder="0" oninput="recalc(${n})">
+      </td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+    </tr>
+    <tr class="row-soit">
+      <td>Soit</td>
+      <td class="dim center">—</td>
+      <td class="dim center">—</td>
+      <td class="computed" id="hp-qte-${n}">0 kWh</td>
+      <td class="center">
+        <div class="pu-wrapper">
+          <input class="cell-input pu-input" type="number" id="hp-pu-${n}" placeholder="0.0000" step="0.0001" oninput="recalc(${n})">
+          <span class="tva-label">+20%</span>
+        </div>
+      </td>
+      <td class="computed-eur" id="hp-sous-total-${n}">0,00 €</td>
+    </tr>
+
+    <!-- ACCISE -->
+    <tr class="section-title"><td colspan="6">Accise sur l'électricité</td></tr>
+    <tr class="row-soit">
+      <td>Consommation totale</td>
+      <td class="dim center">—</td>
+      <td class="dim center">—</td>
+      <td class="computed" id="accise-qte-${n}">0 kWh</td>
+      <td class="center">
+        <div class="pu-wrapper">
+          <input class="cell-input pu-input" type="number" id="accise-pu-${n}" placeholder="0.0000" step="0.0001" oninput="recalc(${n})">
+          <span class="tva-label">+20%</span>
+        </div>
+      </td>
+      <td class="computed-eur" id="accise-total-${n}">0,00 €</td>
+    </tr>
+
+    <!-- ACHEMINEMENT -->
+    <tr class="section-title"><td colspan="6">Contribution tarifaire d'acheminement</td></tr>
+    <tr class="row-fixed">
+      <td>Montant HT</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="dim">—</td>
+      <td class="center">
+        <div class="pu-wrapper">
+          <input class="cell-input pu-input" type="number" id="ach-ht-${n}" placeholder="0.00" step="0.01" oninput="recalc(${n})">
+          <span class="tva-label">+20% ÷ 3</span>
+        </div>
+      </td>
+      <td class="computed-eur" id="ach-part-${n}">—</td>
+    </tr>
+
+    <!-- TOTAL -->
+    <tr class="row-total">
+      <td colspan="5" class="total-label">TOTAL TTC</td>
+      <td class="total-value" id="total-ttc-${n}">0,00 €</td>
+    </tr>
+  `;
+}
+
+// ─── CALCULS ────────────────────────────────────────────
+function eur(v) {
+  return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+function set(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+function recalc(n) {
+  const prixHC    = val('hc-pu-'+n);
+  const prixHP    = val('hp-pu-'+n);
+  const prixAccise = val('accise-pu-'+n);
+  const aboHT     = val('abo-ht-'+n);
+  const achHT     = val('ach-ht-'+n);
+
+  const hcN = val('hc-nouveau-'+n);
+  const hcA = val('hc-ancien-'+n);
+  const hpN = val('hp-nouveau-'+n);
+  const hpA = val('hp-ancien-'+n);
+
+  const hcQte    = Math.max(0, hcN - hcA);
+  const hpQte    = Math.max(0, hpN - hpA);
+  const totalKwh = hcQte + hpQte;
+
+  const hcTTC     = hcQte * prixHC * (1 + TVA);
+  const hpTTC     = hpQte * prixHP * (1 + TVA);
+  const acciseTTC = totalKwh * prixAccise * (1 + TVA);
+
+  // HT → TTC (+20%) → ÷ 3
+  const aboPart = (aboHT * (1 + TVA)) / 3;
+  const achPart = (achHT * (1 + TVA)) / 3;
+
+  const total = aboPart + hcTTC + hpTTC + acciseTTC + achPart;
+
+  set('hc-qte-'+n,        hcQte + ' kWh');
+  set('hc-sous-total-'+n, eur(hcTTC));
+  set('hp-qte-'+n,        hpQte + ' kWh');
+  set('hp-sous-total-'+n, eur(hpTTC));
+  set('accise-qte-'+n,    totalKwh + ' kWh');
+  set('accise-total-'+n,  eur(acciseTTC));
+  set('abo-part-'+n,      eur(aboPart));
+  set('ach-part-'+n,      eur(achPart));
+  set('total-ttc-'+n,     eur(total));
+  set('aregler-'+n,       eur(total));
+  saveData();
+}
+
+function exportCardPDF(cardId) {
+  // Met à jour le titre d'impression
+  const d = document.getElementById('date-releve').value;
+  const label = d ? new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) : 'Sans date';
+  const el = document.getElementById('print-date-label');
+  if (el) el.textContent = label;
+
+  // Masque toutes les cartes sauf celle sélectionnée
+  const allCards = ['card-1','card-2','card-3','card-communs'];
+  allCards.forEach(id => {
+    const card = document.getElementById(id);
+    if (card) card.style.display = (id === cardId) ? '' : 'none';
+  });
+
+  window.print();
+
+  // Restaure toutes les cartes après impression
+  allCards.forEach(id => {
+    const card = document.getElementById(id);
+    if (card) card.style.display = '';
+  });
+}
+
+function exportPDF() {
+  // Met à jour le titre d'impression avec la date
+  const d = document.getElementById('date-releve').value;
+  const label = d ? new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) : 'Sans date';
+  const el = document.getElementById('print-date-label');
+  if (el) el.textContent = label;
+  window.print();
+}
+
+function saveAll() {
+  saveData();
+  const btn = document.getElementById('btn-save-main');
+  btn.textContent = '✅ Sauvegardé !';
+  btn.style.background = '#1a6e4a';
+  btn.style.color = '#fff';
+  setTimeout(() => {
+    btn.textContent = '💾 Sauvegarder';
+    btn.style.background = '#1a1a2e';
+    btn.style.color = '#f0c040';
+  }, 2000);
+}
+
+function recalcCommuns() {
+  const prixHC     = val('c-hc-pu');
+  const prixHP     = val('c-hp-pu');
+  const prixAccise = val('c-accise-pu');
+
+  const hcQte    = Math.max(0, val('c-hc-nouveau') - val('c-hc-ancien'));
+  const hpQte    = Math.max(0, val('c-hp-nouveau') - val('c-hp-ancien'));
+  const totalKwh = hcQte + hpQte;
+
+  const hcTTC     = hcQte * prixHC * (1 + TVA);
+  const hpTTC     = hpQte * prixHP * (1 + TVA);
+  const acciseTTC = totalKwh * prixAccise * (1 + TVA);
+  const total     = hcTTC + hpTTC + acciseTTC;
+
+  set('c-hc-qte',      hcQte + ' kWh');
+  set('c-hc-total',    eur(hcTTC));
+  set('c-hp-qte',      hpQte + ' kWh');
+  set('c-hp-total',    eur(hpTTC));
+  set('c-accise-qte',  totalKwh + ' kWh');
+  set('c-accise-total',eur(acciseTTC));
+  set('c-total-ttc',   eur(total));
+  set('c-aregler',     eur(total));
+  saveData();
+}
+
+function recalcAll() {
+  recalc(1); recalc(2); recalc(3); recalcCommuns();
+}
+
+// ─── API SELECTRA — TARIFS RÉGLEMENTÉS ──────────────────
+// Utilise l'API publique Selectra pour récupérer les tarifs EDF HP/HC du jour.
+// Doc : https://selectra.info/energie/electricite/prix/api
+async function fetchTarifsSelectra() {
+  const btn = document.getElementById('btn-api');
+  const status = document.getElementById('api-status');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Chargement…';
+  status.className = 'api-status loading';
+  status.textContent = 'Connexion à l\'API Selectra en cours…';
+
+  try {
+    // Endpoint public Selectra — tarifs réglementés EDF (option HP/HC, 6 kVA)
+    // L'API renvoie les tarifs du jour au format JSON
+    const url = 'https://api.selectra.info/electricity/prices/france/regulated?option=hphc&power=6';
+    const resp = await fetch(url);
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    // Extraction des valeurs selon la structure de l'API Selectra
+    // Champs attendus : price_hc (€/kWh HT), price_hp (€/kWh HT), accise (€/kWh HT)
+    const prixHC    = data.price_hc    ?? data.hc    ?? data.prices?.hc    ?? null;
+    const prixHP    = data.price_hp    ?? data.hp    ?? data.prices?.hp    ?? null;
+    const accise    = data.accise      ?? data.excise ?? data.prices?.accise ?? null;
+
+    if (prixHC === null || prixHP === null) throw new Error('Structure API inattendue');
+
+    // Remplissage des champs
+    const hcEl     = document.getElementById('prix-hc');
+    const hpEl     = document.getElementById('prix-hp');
+    const accEl    = document.getElementById('prix-accise');
+
+    hcEl.value  = prixHC.toFixed(4);
+    hpEl.value  = prixHP.toFixed(4);
+    if (accise !== null) accEl.value = accise.toFixed(4);
+
+    saveConfig();
+    recalcAll();
+
+    const date = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+    status.className = 'api-status ok';
+    status.textContent = `✅ Tarifs mis à jour le ${date} — HC : ${prixHC.toFixed(4)} €/kWh · HP : ${prixHP.toFixed(4)} €/kWh${accise !== null ? ' · Accise : ' + accise.toFixed(4) + ' €/kWh' : ''}`;
+
+  } catch (err) {
+    // Fallback : tarifs officiels EDF en vigueur au 1er février 2026 (source CRE)
+    console.warn('API Selectra indisponible, utilisation des tarifs officiels 2026 :', err);
+    applyTarifsDefaut();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 Récupérer les tarifs';
+  }
+}
+
+// Tarifs EDF réglementés en vigueur depuis le 1er février 2026 (source CRE / Engie / EDF)
+// HP/HC option 6 kVA — valeurs HT avant TVA 20%
+function applyTarifsDefaut() {
+  const status = document.getElementById('api-status');
+
+  // Prix HT officiels (TTC ÷ 1.20)
+  // HC TTC = 0,1579 €  →  HT = 0,1316
+  // HP TTC = 0,2065 €  →  HT = 0,1721
+  // Accise = 0,03085 €/kWh (exonérée de TVA, montant net)
+  const hcHT     = 0.1316;
+  const hpHT     = 0.1721;
+  const acciseHT = 0.03085;
+
+  document.getElementById('prix-hc').value     = hcHT.toFixed(4);
+  document.getElementById('prix-hp').value     = hpHT.toFixed(4);
+  document.getElementById('prix-accise').value = acciseHT.toFixed(4);
+
+  saveConfig();
+  recalcAll();
+
+  status.className = 'api-status err';
+  status.textContent = `⚠️ API non disponible depuis ce navigateur (CORS). Tarifs officiels EDF au 01/02/2026 appliqués : HC ${hcHT} €/kWh HT · HP ${hpHT} €/kWh HT · Accise ${acciseHT} €/kWh. Vérifiez sur selectra.info/energie/electricite/prix.`;
+}
+
+
+function updateBadges() {
+  const d = document.getElementById('date-releve').value;
+  const label = d ? new Date(d).toLocaleDateString('fr-FR', { month:'long', year:'numeric' }) : '—';
+  document.querySelectorAll('.period-badge').forEach(b => b.textContent = label);
+  document.getElementById('date-display').textContent = d ? 'Relevé du ' + new Date(d).toLocaleDateString('fr-FR') : '';
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function showTab(t) {
+  document.getElementById('tab-releves').style.display = t === 'releves' ? 'block' : 'none';
+  document.getElementById('tab-config').style.display = t === 'config' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && t === 'releves') || (i === 1 && t === 'config'));
+  });
+  if (t === 'releves') recalcAll();
+}
+
+// ─── INIT ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildTable(1); buildTable(2); buildTable(3);
+  loadConfig();
+  loadData();
+  recalcAll();
+  const today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('date-display').textContent = today;
+  document.getElementById('date-releve').addEventListener('change', updateBadges);
+});
+</script>
+</body>
+</html>
